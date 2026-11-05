@@ -36,8 +36,7 @@ def fetch_tech_news():
                 "description": article.get("description"),
                 "url": article.get("url"),
                 "source": article.get("source", {}).get("name"),
-                "published_at": article.get("publishedAt"),
-                "image": article.get("image")
+                "published_at": article.get("publishedAt")
             })
 
         print(f"Successfully fetched {len(news_list)} articles.")
@@ -49,5 +48,5 @@ def fetch_tech_news():
         return []
 
     except ValueError as error:
-        print(f"Invalid JSON response: {error}")
+        print(f"Invalid API response: {error}")
         return []

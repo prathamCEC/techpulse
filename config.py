@@ -1,17 +1,18 @@
 import os
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
 
-# API Credentials
+# API credentials
 GNEWS_API_KEY = os.getenv("GNEWS_API_KEY")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
-# Application Settings
+# Application settings
 TIMEZONE = os.getenv("TIMEZONE", "Asia/Kolkata")
 NEWS_LIMIT = int(os.getenv("NEWS_LIMIT", "10"))
 
-# Validate credentials
+# Validate required credentials
 if not GNEWS_API_KEY:
     raise ValueError("GNEWS_API_KEY is missing in .env")
 
