@@ -1,46 +1,143 @@
 import re
-from urllib.parse import urlparse
 
 
 CATEGORY_KEYWORDS = {
     "AI": [
         "artificial intelligence", "openai", "chatgpt",
         "machine learning", "deep learning", "llm",
-        "generative ai", "ai model", "ai agent"
+        "generative ai", "ai model", "ai agent",
+        "gemini", "claude", "grok", "neural network"
     ],
 
     "Cybersecurity": [
         "cybersecurity", "hacking", "data breach",
         "vulnerability", "malware", "ransomware",
-        "security flaw", "cyber attack"
+        "security flaw", "cyber attack", "zero-day",
+        "phishing", "encryption"
     ],
 
     "Startups": [
         "startup", "funding", "venture capital",
-        "acquisition", "series a", "series b"
+        "acquisition", "series a", "series b",
+        "seed funding", "valuation"
     ],
 
     "Big Tech": [
         "google", "microsoft", "apple", "meta",
-        "nvidia", "amazon", "intel"
+        "nvidia", "amazon", "intel", "samsung"
     ],
 
     "Developer Tools": [
-        "python", "javascript", "developer",
-        "programming", "github", "framework",
-        "software development"
+        "python", "javascript", "github", "developer",
+        "programming", "software development",
+        "framework", "open source", "database",
+        "api", "linux"
+    ],
+
+    "Hardware": [
+        "processor", "gpu", "cpu", "chip",
+        "semiconductor", "graphics card",
+        "smartphone", "laptop", "data center"
+    ],
+
+    "Science & Emerging Technology": [
+        "quantum computing", "robotics",
+        "space technology", "biotechnology",
+        "scientific research", "renewable energy",
+        "solar cells", "autonomous systems"
+    ],
+
+    "Gaming Technology": [
+        "game engine", "gaming hardware",
+        "graphics technology", "cloud gaming",
+        "game development", "virtual reality",
+        "augmented reality"
     ]
 }
 
 
+EXCLUDED_KEYWORDS = [
+    "merchandise", "playable toy", "store stock",
+    "lowest price", "discount", "shopping deal",
+    "buy now", "product review", "coupon"
+]
+
+
+TECH_INDICATORS = [
+    "technology", "artificial intelligence", "software",
+    "hardware", "computer", "digital", "cybersecurity",
+    "semiconductor", "robotics", "programming",
+    "machine learning", "cloud computing", "data center",
+    "smartphone", "internet", "chip", "developer",
+    "quantum computing", "gaming technology","gpu",
+    "cpu", "processor", "graphics processor",
+    "semiconductor", "chip", "graphics card","gaming hardware", 
+    "cloud gaming"
+]
+
+
 def normalize_text(text):
-    """Normalize text for duplicate detection."""
+    """Normalize text for matching."""
+
     text = text.lower()
-    text = re.sub(r"[^\w\s]", "", text)
+    text = re.sub(r"[^\w\s]", " ", text)
+
     return " ".join(text.split())
 
 
+def is_valid_article(article):
+    """Check whether an article contains essential information."""
+
+    title = article.get("title")
+    url = article.get("url")
+
+    if not title or not url:
+        return False
+
+    if not url.startswith(("http://", "https://")):
+        return False
+
+    if len(title.strip()) < 15:
+        return False
+
+    return True
+
+
+def is_relevant(article):
+    """Determine whether an article is relevant to technology."""
+
+    title = normalize_text(article.get("title") or "")
+    description = normalize_text(article.get("description") or "")
+
+    content = f"{title} {description}"
+
+    if not any(keyword in content for keyword in TECH_INDICATORS):
+        return False
+
+    if any(keyword in content for keyword in EXCLUDED_KEYWORDS):
+        return False
+
+    return True
+
+
+def categorize_article(article):
+    """Assign a technology category to an article."""
+
+    content = normalize_text(
+        f"{article.get('title') or ''} "
+        f"{article.get('description') or ''}"
+    )
+
+    for category, keywords in CATEGORY_KEYWORDS.items():
+
+        if any(normalize_text(keyword) in content for keyword in keywords):
+            return category
+
+    return "General Technology"
+
+
 def remove_duplicates(articles):
+    """Remove duplicate articles using URLs and titles."""
 
     unique_articles = []
     seen_urls = set()
@@ -49,54 +146,41 @@ def remove_duplicates(articles):
     for article in articles:
 
         url = article.get("url")
-        title = article.get("title")
-
-        normalized_title = normalize_text(title or "")
+        title = normalize_text(article.get("title") or "")
 
         if url and url in seen_urls:
             continue
 
-        if normalized_title and normalized_title in seen_titles:
+        if title and title in seen_titles:
             continue
 
         if url:
             seen_urls.add(url)
 
-        if normalized_title:
-            seen_titles.add(normalized_title)
+        if title:
+            seen_titles.add(title)
 
         unique_articles.append(article)
 
     return unique_articles
 
 
-def categorize_article(article):
-
-    text = normalize_text(
-        f"{article.get('title') or ''} "
-        f"{article.get('description') or ''}"
-    )
-
-    for category, keywords in CATEGORY_KEYWORDS.items():
-
-        for keyword in keywords:
-
-            if normalize_text(keyword) in text:
-                return category
-
-    return "General Technology"
-
-
 def process_news(articles):
+    """Run the complete news filtering pipeline."""
 
-    unique_articles = remove_duplicates(articles)
+    valid_articles = [
+        article for article in articles
+        if is_valid_article(article)
+    ]
 
-    processed_articles = []
+    relevant_articles = [
+        article for article in valid_articles
+        if is_relevant(article)
+    ]
+
+    unique_articles = remove_duplicates(relevant_articles)
 
     for article in unique_articles:
-
         article["category"] = categorize_article(article)
 
-        processed_articles.append(article)
-
-    return processed_articles
+    return unique_articles

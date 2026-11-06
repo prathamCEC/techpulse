@@ -1,3 +1,4 @@
+
 import requests
 
 from config import GNEWS_API_KEY, NEWS_LIMIT
@@ -10,14 +11,18 @@ def fetch_tech_news():
     params = {
         "category": "technology",
         "lang": "en",
-        "max": NEWS_LIMIT,
-        "apikey": GNEWS_API_KEY
+        "max": NEWS_LIMIT
+    }
+
+    headers = {
+        "X-Api-Key": GNEWS_API_KEY
     }
 
     try:
         response = requests.get(
             GNEWS_URL,
             params=params,
+            headers=headers,
             timeout=20
         )
 
@@ -39,8 +44,6 @@ def fetch_tech_news():
                 "published_at": article.get("publishedAt")
             })
 
-        print(f"Successfully fetched {len(news_list)} articles.")
-
         return news_list
 
     except requests.exceptions.RequestException as error:
@@ -48,5 +51,5 @@ def fetch_tech_news():
         return []
 
     except ValueError as error:
-        print(f"Invalid API response: {error}")
+        print(f"Invalid JSON response: {error}")
         return []
