@@ -16,6 +16,8 @@ NEWS_LIMIT = int(os.getenv("NEWS_LIMIT", "10"))
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL")
 
+GEMINI_FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL")
+
 # Validate required credentials
 if not GNEWS_API_KEY:
     raise ValueError("GNEWS_API_KEY is missing in .env")
