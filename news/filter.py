@@ -64,15 +64,38 @@ EXCLUDED_KEYWORDS = [
 
 
 TECH_INDICATORS = [
-    "technology", "artificial intelligence", "software",
-    "hardware", "computer", "digital", "cybersecurity",
-    "semiconductor", "robotics", "programming",
-    "machine learning", "cloud computing", "data center",
-    "smartphone", "internet", "chip", "developer",
-    "quantum computing", "gaming technology","gpu",
-    "cpu", "processor", "graphics processor",
-    "semiconductor", "chip", "graphics card","gaming hardware", 
-    "cloud gaming"
+    # General technology
+    "technology", "tech", "digital", "computer",
+    "software", "hardware", "internet", "online",
+
+    # AI
+    "artificial intelligence", "ai", "machine learning",
+    "deep learning", "llm", "chatgpt", "siri",
+    "generative ai", "ai model",
+
+    # Devices and hardware
+    "smartphone", "iphone", "android", "laptop",
+    "processor", "gpu", "cpu", "chip",
+    "semiconductor", "graphics card", "qi2",
+    "charger", "display", "oled", "snapdragon",
+
+    # Cybersecurity
+    "cybersecurity", "malware", "ransomware",
+    "data breach", "vulnerability", "phishing",
+    "security flaw", "zero-day",
+
+    # Development
+    "programming", "developer", "github",
+    "javascript", "python", "api", "database",
+    "open source", "framework",
+
+    # Emerging technology
+    "robotics", "quantum computing", "biotechnology",
+    "cloud computing", "data center", "autonomous systems",
+
+    # Gaming technology
+    "gaming hardware", "game engine", "cloud gaming",
+    "virtual reality", "augmented reality"
 ]
 
 
@@ -104,20 +127,23 @@ def is_valid_article(article):
 
 
 def is_relevant(article):
-    """Determine whether an article is relevant to technology."""
-
     title = normalize_text(article.get("title") or "")
     description = normalize_text(article.get("description") or "")
 
     content = f"{title} {description}"
 
-    if not any(keyword in content for keyword in TECH_INDICATORS):
-        return False
-
+    # Reject promotional and shopping content
     if any(keyword in content for keyword in EXCLUDED_KEYWORDS):
         return False
 
-    return True
+    # Accept articles containing technology indicators
+    if any(
+        normalize_text(keyword) in content
+        for keyword in TECH_INDICATORS
+    ):
+        return True
+
+    return False
 
 
 def categorize_article(article):

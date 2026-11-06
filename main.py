@@ -1,6 +1,6 @@
-
 from news.fetcher import fetch_tech_news
 from news.filter import process_news
+from bot.telegram_bot import run_bot
 
 
 def main():
@@ -32,4 +32,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    run_bot()
