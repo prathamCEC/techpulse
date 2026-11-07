@@ -3,7 +3,7 @@ name: TechPulse Daily Briefing
 
 on:
   schedule:
-    - cron: "0 19 * * *"
+    - cron: "14 19 * * *"
       timezone: "Asia/Kolkata"
 
   workflow_dispatch:
